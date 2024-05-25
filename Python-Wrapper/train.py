@@ -215,7 +215,7 @@ class Trainer():
                 self.agent.save(args.ckpt_dir, f"model_{self.t}.pt")
 
             if self.t % args.save_mem_interval == 0:
-                self.memory.save_data(args.ckpt_dir, f"mem_{self.t}.h5")
+                self.memory.save_data(args.ckpt_dir, f"mem.h5")
 
 
  
