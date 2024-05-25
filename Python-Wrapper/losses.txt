@@ -1516,3 +1516,10 @@
 [43]{'policy_loss': -43.725, 'ent_loss': -0.005, 'mem_len': 250000}
 [44]{'policy_loss': -43.048, 'ent_loss': -0.049, 'mem_len': 250000}
 [45]{'policy_loss': -42.32, 'ent_loss': -0.034, 'mem_len': 250000}
+[46]{'policy_loss': -44.523, 'ent_loss': -0.054, 'mem_len': 250000}
+[47]{'policy_loss': -46.26, 'ent_loss': -0.025, 'mem_len': 250000}
+[48]{'policy_loss': -43.389, 'ent_loss': 0.131, 'mem_len': 250000}
+[49]{'policy_loss': -45.112, 'ent_loss': -0.164, 'mem_len': 250000}
+[50]{'policy_loss': -42.399, 'ent_loss': -0.189, 'mem_len': 250000}
+[51]{'policy_loss': -45.296, 'ent_loss': 0.168, 'mem_len': 250000}
+[52]{'policy_loss': -45.727, 'ent_loss': -0.05, 'mem_len': 250000}
