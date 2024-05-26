@@ -116,7 +116,7 @@ class Trainer():
                     with open("rewards.txt", "a") as f: 
                         f.write(f'[{self.n_episode}] {self.episode_reward}' + '\n')
                                     
-                    # print(f'[{self.n_episode}] episode_reward: {self.episode_reward}')
+                    print(f'[{self.n_episode}] episode_reward: {self.episode_reward}')
 
                 self.episode_reward = 0 
                 self.n_episode += 1
@@ -191,45 +191,45 @@ class Trainer():
 
             self.rollout_episode() 
 
-            # if len(self.memory) > args.batch_size: 
+            if len(self.memory) > args.batch_size: 
                 
-            #     for _ in range(args.update_n):
-            #         batch, idxs, importance_weights = self.memory.sample(\
-            #                                 args.batch_size, self.importance_exponent)
-            #         priorities, policy_loss, ent_loss =\
-            #                                 self.agent.update_parameters(batch, importance_weights)
+                for _ in range(args.update_n):
+                    batch, idxs, importance_weights = self.memory.sample(\
+                                            args.batch_size, self.importance_exponent)
+                    priorities, policy_loss, ent_loss =\
+                                            self.agent.update_parameters(batch, importance_weights)
                     
-            #         self.memory.update_priorities(idxs, priorities, self.priority_exponent)
+                    self.memory.update_priorities(idxs, priorities, self.priority_exponent)
 
  
-            #     self.priority_exponent += priority_delta
-            #     self.priority_exponent = min(args.end_priority_exponent, self.priority_exponent)
+                self.priority_exponent += priority_delta
+                self.priority_exponent = min(args.end_priority_exponent, self.priority_exponent)
 
-            #     self.importance_exponent += importance_delta
-            #     self.importance_exponent = min(args.end_importance_exponent, self.importance_exponent)
+                self.importance_exponent += importance_delta
+                self.importance_exponent = min(args.end_importance_exponent, self.importance_exponent)
 
 
-            #     if(self.t % args.log_loss_interval == 0):
+                if(self.t % args.log_loss_interval == 0):
                     
-            #         log = str({'policy_loss': round(policy_loss, 3), 
-            #                     'ent_loss': round(ent_loss, 3),
-            #                     'mem_len': len(self.memory),
-            #                     'priority_exponent': self.priority_exponent,
-            #                     'importance_exponent': self.importance_exponent
-            #                     })
+                    log = str({'policy_loss': round(policy_loss, 3), 
+                                'ent_loss': round(ent_loss, 3),
+                                'mem_len': len(self.memory),
+                                'priority_exponent': self.priority_exponent,
+                                'importance_exponent': self.importance_exponent
+                                })
                     
-            #         # print(f'[{self.t}]' + log)
+                    # print(f'[{self.t}]' + log)
 
-            #         with open("losses.txt", "a") as f: 
-            #             f.write(f'[{self.t}]' + log + '\n')
+                    with open("losses.txt", "a") as f: 
+                        f.write(f'[{self.t}]' + log + '\n')
 
 
 
-            # if self.t % args.save_model_interval == 0:
-            #     self.agent.save(args.ckpt_dir, f"model_{self.t}.pt")
+            if self.t % args.save_model_interval == 0:
+                self.agent.save(args.ckpt_dir, f"model_{self.t}.pt")
 
-            # if self.t % args.save_mem_interval == 0:
-            #     self.memory.save_data(args.ckpt_dir, f"mem.h5")
+            if self.t % args.save_mem_interval == 0:
+                self.memory.save_data(args.ckpt_dir, f"mem.h5")
 
 
  

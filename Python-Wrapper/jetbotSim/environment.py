@@ -106,11 +106,9 @@ class Env():
 
         self.robot = Robot()
         
-        self.k = 4
+        self.k = 32
         self.recent_rewards = deque(maxlen=self.k) 
-
-        self.recent_bads = deque(maxlen=8) 
-
+ 
         self.i = 0
         
         for _ in range(self.k):
@@ -136,43 +134,23 @@ class Env():
         while True: 
             if self.buffer is not None and self.on_change:
 
-                nparr = np.fromstring(self.buffer[5:], np.uint8)
-                img_ = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-
-                img = process_observation(img_.copy())
-
-                l = 12
-                # print(f'\rr: {np.mean(img[:, -3:, l:-l]).round(3)}')
-                # if(np.mean(img[2, -3:, :]) > 50):
-
-                is_bad1 = np.mean(img[:, -2:, l:-l]) > 29
-
-                r = np.mean(img[2, -3:, :]).round(3)
-                rgb = np.mean(img[:, -3:, :]).round(3)
-                
-                is_collide = r > 45 and r > rgb
-
-                # print(f'[{self.i}] all: {np.mean(img[:, -3:, l:-l]).round(3)}, r: {np.mean(img[2, -3:, l:-l]).round(3)}')
-
-
-                # if(is_bad):
-                #     print(f'[{self.i}] collision!')
-                #     self.i+=1
-                self.recent_bads.append(int(is_bad1))
-                # print(f'\rrecent_bads: {self.recent_bads}')
-
-                reward = int.from_bytes(self.buffer[:4], 'little')
-
                 self.on_change = False
 
-                self.recent_rewards.append(reward)
+                nparr = np.fromstring(self.buffer[5:], np.uint8)
+                img_ = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+                img = process_observation(img_.copy())
+ 
               
-                is_bad2 = not np.any(self.recent_rewards)
-                if(is_bad2): reward = -1
+                r = np.mean(img[2, -3:, :]).round(3)
+                rgb = np.mean(img[:, -3:, :]).round(3) 
+                is_collide = r > 45 and r > rgb              
+                
+                reward = int.from_bytes(self.buffer[:4], 'little')
+                self.recent_rewards.append(reward)              
+                is_no_progress = not np.any(self.recent_rewards)
 
-                # done = np.all(self.recent_bads) # and is_bad2
-                # done = False
-                done = is_collide
+                done = is_collide or is_no_progress
+                if(done): reward = -1
 
                 # if(done):
                     # print(f'[{self.i}] done!')
