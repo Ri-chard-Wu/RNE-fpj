@@ -36,11 +36,11 @@ train_args = AttrDict({
 
             'ckpt_dir': 'ckpt',
           
-            'load_model': 'model_300.pt',
-            'load_mem': 'mem.h5',
+            'load_model': 'model_100.pt',
+            # 'load_mem': 'mem.h5',
 
-            'save_model_interval': 50,             
-            'save_mem_interval': 250,
+            'save_model_interval': 25,             
+            'save_mem_interval': 100,
             'log_reward_interval': 1,
             'log_loss_interval': 1,
 

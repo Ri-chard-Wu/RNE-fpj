@@ -7,10 +7,11 @@ from websocket import create_connection
 import threading
 import time
 import config
- 
+from PIL import Image
 import struct
 import json 
-
+import time
+from parameters import action_dim, obs_shape, DEVICE
 from collections import deque
 
 class Robot():
@@ -83,6 +84,18 @@ class Robot():
 
 
 
+
+def process_observation(screen): 
+ 
+    img = Image.fromarray(screen)
+    img = img.resize(obs_shape[:2], Image.BILINEAR)
+    img = np.array(img) # (64, 64, 3) 
+
+    return np.transpose(img, (2, 0, 1)) # (3, 64, 64)
+ 
+
+
+
 class Env():
     def __init__(self):    
         self.ws = None
@@ -93,8 +106,12 @@ class Env():
 
         self.robot = Robot()
         
-        self.k = 32
+        self.k = 4
         self.recent_rewards = deque(maxlen=self.k) 
+
+        self.recent_bads = deque(maxlen=8) 
+
+        self.i = 0
         
         for _ in range(self.k):
             self.recent_rewards.append(1)
@@ -120,19 +137,50 @@ class Env():
             if self.buffer is not None and self.on_change:
 
                 nparr = np.fromstring(self.buffer[5:], np.uint8)
-                img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+                img_ = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+                img = process_observation(img_.copy())
+
+                l = 12
+                # print(f'\rr: {np.mean(img[:, -3:, l:-l]).round(3)}')
+                # if(np.mean(img[2, -3:, :]) > 50):
+
+                is_bad1 = np.mean(img[:, -2:, l:-l]) > 29
+
+                r = np.mean(img[2, -3:, :]).round(3)
+                rgb = np.mean(img[:, -3:, :]).round(3)
+                
+                is_collide = r > 45 and r > rgb
+
+                # print(f'[{self.i}] all: {np.mean(img[:, -3:, l:-l]).round(3)}, r: {np.mean(img[2, -3:, l:-l]).round(3)}')
+
+
+                # if(is_bad):
+                #     print(f'[{self.i}] collision!')
+                #     self.i+=1
+                self.recent_bads.append(int(is_bad1))
+                # print(f'\rrecent_bads: {self.recent_bads}')
 
                 reward = int.from_bytes(self.buffer[:4], 'little')
-                # done = bool.from_bytes(self.buffer[4:5], 'little')
 
                 self.on_change = False
 
                 self.recent_rewards.append(reward)
               
-                done = not np.any(self.recent_rewards)
-                if(done): reward = -1
+                is_bad2 = not np.any(self.recent_rewards)
+                if(is_bad2): reward = -1
 
-                return img.copy(), reward, done, None
+                # done = np.all(self.recent_bads) # and is_bad2
+                # done = False
+                done = is_collide
+
+                # if(done):
+                    # print(f'[{self.i}] done!')
+                    # self.i+=1
+                    # time.sleep(3)
+                    # cv2.imwrite(f'output/{self.i}.png', np.transpose(img, (1,2,0)))
+
+                return img, reward, done, None
        
 
     def reset(self):

@@ -15,14 +15,6 @@ from parameters import action_dim, obs_shape, DEVICE
 from parameters import train_args as args
  
 
-def process_observation(screen): 
- 
-    img = Image.fromarray(screen)
-    img = img.resize(obs_shape[:2], Image.BILINEAR)
-    img = np.array(img) # (64, 64, 3)
- 
-    return np.transpose(img, (2, 0, 1)) # (3, 64, 64)
- 
 
 
 
@@ -77,8 +69,9 @@ class Trainer():
         self.importance_exponent =  args.start_importance_exponent
 
 
-        self.obs = self.env.reset()
-        self.obs = process_observation(self.obs) # (3, 64, 64)
+        self.obs = self.env.reset() # (3, 64, 64)
+        # self.obs = process_observation(self.obs) # (3, 64, 64)
+        
         self.vel = np.array([0.0, 0.0])
         
         self.episode_reward = 0
@@ -117,20 +110,20 @@ class Trainer():
             next_obs, reward, done, _ = self.env.step(action)  # Step
 
             if(done):
-                next_obs = self.env.reset() 
+                next_obs = self.env.reset()  # (3, 64, 64)
     
                 if(self.n_episode % args.log_reward_interval == 0):
                     with open("rewards.txt", "a") as f: 
                         f.write(f'[{self.n_episode}] {self.episode_reward}' + '\n')
                                     
-                    print(f'[{self.n_episode}] episode_reward: {self.episode_reward}')
+                    # print(f'[{self.n_episode}] episode_reward: {self.episode_reward}')
 
                 self.episode_reward = 0 
                 self.n_episode += 1
                 
                 
 
-            next_obs = process_observation(next_obs) # (3, 64, 64)
+            # next_obs = process_observation(next_obs) # (3, 64, 64)
             
             mask = float(not done)
             self.episode_reward += reward 
@@ -198,44 +191,45 @@ class Trainer():
 
             self.rollout_episode() 
 
-            if len(self.memory) > args.batch_size: 
+            # if len(self.memory) > args.batch_size: 
                 
-                for _ in range(args.update_n):
-                    batch, idxs, importance_weights = self.memory.sample(\
-                                            args.batch_size, self.importance_exponent)
-                    priorities, policy_loss, ent_loss =\
-                                            self.agent.update_parameters(batch, importance_weights)
+            #     for _ in range(args.update_n):
+            #         batch, idxs, importance_weights = self.memory.sample(\
+            #                                 args.batch_size, self.importance_exponent)
+            #         priorities, policy_loss, ent_loss =\
+            #                                 self.agent.update_parameters(batch, importance_weights)
                     
-                    self.memory.update_priorities(idxs, priorities, self.priority_exponent)
+            #         self.memory.update_priorities(idxs, priorities, self.priority_exponent)
 
  
-                self.priority_exponent += priority_delta
-                self.priority_exponent = min(args.end_priority_exponent, self.priority_exponent)
+            #     self.priority_exponent += priority_delta
+            #     self.priority_exponent = min(args.end_priority_exponent, self.priority_exponent)
 
-                self.importance_exponent += importance_delta
-                self.importance_exponent = min(args.end_importance_exponent, self.importance_exponent)
+            #     self.importance_exponent += importance_delta
+            #     self.importance_exponent = min(args.end_importance_exponent, self.importance_exponent)
 
 
-                if(self.t % args.log_loss_interval == 0):
+            #     if(self.t % args.log_loss_interval == 0):
                     
-                    log = str({'policy_loss': round(policy_loss, 3), 
-                                'ent_loss': round(ent_loss, 3),
-                                'mem_len': len(self.memory),
-                                'priority_exponent': self.priority_exponent,
-                                'importance_exponent': self.importance_exponent
-                                })
+            #         log = str({'policy_loss': round(policy_loss, 3), 
+            #                     'ent_loss': round(ent_loss, 3),
+            #                     'mem_len': len(self.memory),
+            #                     'priority_exponent': self.priority_exponent,
+            #                     'importance_exponent': self.importance_exponent
+            #                     })
                     
-                    # print(f'[{self.t}]' + log)
+            #         # print(f'[{self.t}]' + log)
 
-                    with open("losses.txt", "a") as f: 
-                        f.write(f'[{self.t}]' + log + '\n')
+            #         with open("losses.txt", "a") as f: 
+            #             f.write(f'[{self.t}]' + log + '\n')
 
 
-            if self.t % args.save_model_interval == 0:
-                self.agent.save(args.ckpt_dir, f"model_{self.t}.pt")
 
-            if self.t % args.save_mem_interval == 0:
-                self.memory.save_data(args.ckpt_dir, f"mem.h5")
+            # if self.t % args.save_model_interval == 0:
+            #     self.agent.save(args.ckpt_dir, f"model_{self.t}.pt")
+
+            # if self.t % args.save_mem_interval == 0:
+            #     self.memory.save_data(args.ckpt_dir, f"mem.h5")
 
 
  
