@@ -93,7 +93,7 @@ class Env():
 
         self.robot = Robot()
         
-        self.k = 16
+        self.k = 32
         self.recent_rewards = deque(maxlen=self.k) 
         
         for _ in range(self.k):

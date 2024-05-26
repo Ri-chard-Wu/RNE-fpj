@@ -29,7 +29,6 @@ train_args = AttrDict({
             'seed': 69,
             'batch_size': [32, 256][1],
             'num_steps': int(1e9),
-            'updates_per_step': 1,
             
             'replay_size': 250000,
            
@@ -37,21 +36,26 @@ train_args = AttrDict({
 
             'ckpt_dir': 'ckpt',
           
-            'load_model': 'model_1230.pt',
-            'load_mem': 'mem_1250.h5',
+            'load_model': 'model_300.pt',
+            'load_mem': 'mem.h5',
 
             'save_model_interval': 50,             
             'save_mem_interval': 250,
             'log_reward_interval': 1,
             'log_loss_interval': 1,
 
-            'update_n': 8,
+            'update_n': 32,
 
             'prefill_n': [1, 64, 512][0],
             'return_steps': 10, 
             'gamma': 0.99,
-            'frame_skip': 1
+            'frame_skip': 1,
 
+            'start_priority_exponent': [0.55, 0.89][1],            
+            'start_importance_exponent': [0.55, 0.89][1],
+            'end_priority_exponent': 0.9,
+            'end_importance_exponent': 0.9,
+            'prioritization_steps': 100
         })
 
 

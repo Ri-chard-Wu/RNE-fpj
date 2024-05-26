@@ -73,6 +73,9 @@ class Trainer():
             self.memory.load_data(args.ckpt_dir, args.load_mem)         
         self.n_step_buffer = deque(maxlen=args.return_steps)
 
+        self.priority_exponent =  args.start_priority_exponent
+        self.importance_exponent =  args.start_importance_exponent
+
 
         self.obs = self.env.reset()
         self.obs = process_observation(self.obs) # (3, 64, 64)
@@ -164,7 +167,7 @@ class Trainer():
                 
                 assert priorities.shape == (1,)
 
-                self.memory.push(data, priorities[0]) 
+                self.memory.push(data, priorities[0], self.priority_exponent) 
 
 
             if(done): break
@@ -182,30 +185,47 @@ class Trainer():
 
         print()
 
+
+        priority_delta = (args.end_priority_exponent -\
+                            args.start_priority_exponent) / args.prioritization_steps
+        importance_delta = (args.end_importance_exponent -\
+                            args.start_importance_exponent) / args.prioritization_steps
+
+
         for _ in range(args.num_steps):
             
             self.t += 1
 
-            self.rollout_episode()
-
+            self.rollout_episode() 
 
             if len(self.memory) > args.batch_size: 
                 
                 for _ in range(args.update_n):
-                    batch, idxs, importance_weights = self.memory.sample(batch_size=args.batch_size)
+                    batch, idxs, importance_weights = self.memory.sample(\
+                                            args.batch_size, self.importance_exponent)
                     priorities, policy_loss, ent_loss =\
                                             self.agent.update_parameters(batch, importance_weights)
                     
-                    self.memory.update_priorities(idxs, priorities)
+                    self.memory.update_priorities(idxs, priorities, self.priority_exponent)
+
+ 
+                self.priority_exponent += priority_delta
+                self.priority_exponent = min(args.end_priority_exponent, self.priority_exponent)
+
+                self.importance_exponent += importance_delta
+                self.importance_exponent = min(args.end_importance_exponent, self.importance_exponent)
+
 
                 if(self.t % args.log_loss_interval == 0):
                     
                     log = str({'policy_loss': round(policy_loss, 3), 
                                 'ent_loss': round(ent_loss, 3),
-                                'mem_len': len(self.memory)
+                                'mem_len': len(self.memory),
+                                'priority_exponent': self.priority_exponent,
+                                'importance_exponent': self.importance_exponent
                                 })
                     
-                    print(f'[{self.t}]' + log)
+                    # print(f'[{self.t}]' + log)
 
                     with open("losses.txt", "a") as f: 
                         f.write(f'[{self.t}]' + log + '\n')
