@@ -10,10 +10,11 @@ This repository contains code to set up a reinforcement learning agent using the
 
 
 ## Train model  
-First navigate to the `Python-Wrapper` directory, the run the following command:
+First navigate to the `Python-Wrapper` directory, then run the following command:
 ```bash
 python train.py
 ```
+Paremeters are all contained in `Python-Wrapper/parameters.py`.
 
 ## Pre-trained weights  
 
