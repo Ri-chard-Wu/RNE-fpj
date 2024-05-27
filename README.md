@@ -10,11 +10,11 @@ This repository contains code to set up a reinforcement learning agent using the
 
 
 ## Train model  
-
+First navigate to the `Python-Wrapper` directory, the run the following command:
 ```bash
 python train.py
 ```
 
 ## Pre-trained weights  
 
-Pre-trained models are contained in the `ckpt` directory. To use a pre-trained weights, first rename the name of the ckeckpoint file to have a ".pt" suffix, then in `parameters.py` set the `load_model` to the name of the checkpoint file.
+Pre-trained models are contained in the `Python-Wrapper/ckpt` directory. To use a pre-trained weights, first rename the name of the ckeckpoint file to have a ".pt" suffix, then in `Python-Wrapper/parameters.py` set `load_model` to the name of the checkpoint file.
